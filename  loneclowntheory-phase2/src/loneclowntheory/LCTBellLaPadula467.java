@@ -75,66 +75,15 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
         String query = "";
 
-        String catStr = "'";
-
-        for (int i = 0; i < maxLevel.categories.length; i++)
-        {
-            switch (maxLevel.categories[i])
-            {
-                case CA:
-                    catStr = catStr + "CA,SFO,LAX,";
-                    break;
-                case AZ:
-                    catStr = catStr + "AZ,PHX,TUS,";
-                    break;
-                case NM:
-                    catStr = catStr + "NM,ABQ,";
-                    break;
-                case TX:
-                    catStr = catStr + "TX,IAH,DAL,";
-                    break;
-                case SFO:
-                    catStr = catStr + "SFO,";
-                    break;
-                case LAX:
-                    catStr = catStr + "LAX,";
-                    break;
-                case PHX:
-                    catStr = catStr + "PHX,";
-                    break;
-                case TUS:
-                    catStr = catStr + "TUS,";
-                    break;
-                case ABQ:
-                    catStr = catStr + "NM,ABQ,";
-                    break;
-                case IAH:
-                    catStr = catStr + "IAH,";
-                    break;
-                case DAL:
-                    catStr = catStr + "DAL,";
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        if (catStr.length() == 1)
-        {
-            catStr = "''";
-        }
-        else
-        {
-            catStr = catStr.substring(0, catStr.length() - 1) + "'";
-        }
-
+        String catStr = this.getCatString(maxLevel);
+        
         try
         {
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
             query = "INSERT INTO " + dbName + "." + entityTable
-                    + " (`entityName`, `subject_or_object`, `sensitivity`, `category`) "
-                    + "VALUES ('" + subjectName + "','1','" + maxLevel.sensitivity.ordinal() + "'," + catStr + ")";
+                    + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`) "
+                    + "VALUES ('" + subjectName + "','1','" + maxLevel.sensitivity.ordinal() + "'," + catStr + ",'" + + maxLevel.sensitivity.ordinal() + "'," + catStr +")";
 
             stmt.executeUpdate(query);
 
@@ -164,6 +113,164 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
         String query = "";
 
+        String catStr = this.getCatString(level);
+
+        try
+        {
+            stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+
+            query = "INSERT INTO " + dbName + "." + entityTable
+                    + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`) "
+                    + "VALUES ('" + objectName + "','0','0','','" + level.sensitivity.ordinal() + "'," + catStr +")";
+
+            stmt.executeUpdate(query);
+
+            System.out.println("OK");
+
+            stmt.close();
+        }
+        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
+        {
+            System.out.println("NO");
+        }
+        catch (SQLException e)
+        {
+            System.out.println(e);
+        }
+    }
+
+    /**
+     * Set's a subject's current security clearance to 'level', which must be dominated by the
+     * subject's maximum security level. Returns "OK" on success, "NO" otherwise.
+     *
+     * @param subjectName  The name of the subject.
+     * @param level        The new clearance level of the subject.
+     * @return             {"OK", "NO"}
+     */
+    public String updateSL(String subjectName, SecurityLevel467 level)
+    {
+        String rtnStr = "NO";
+
+        this.newSubject("temp", level);
+
+        if (this.dominates(subjectName, "temp"))
+        {
+            rtnStr = "OK";
+        }
+        else
+        {
+            rtnStr = "NO";
+        }
+
+        String query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
+        Statement stmt = null;
+
+        try
+        {
+            stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            stmt.execute(query);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+
+        return rtnStr;
+    }
+
+    /**
+     * Object's current security classification is increased to 'level'. The new level should dominate
+     * the old security classification level of the object. Returns "OK" on success, "NO" otherwise.
+     *
+     * @param objectName  The name of the object.
+     * @param level       The new classification level of the object.
+     * @return            {"OK", "NO"}
+     */
+    public String classifyOL(String objectName, SecurityLevel467 level)
+    {
+        return "";
+    }
+
+    /**
+     * A subject whose clearance dominates the object's classification lowers the security level of
+     * the object. Returns "OK" on success, "NO" otherwise.
+     *
+     * @param subjectName  The name of the subject declassifying the object.
+     * @param objectName   The name of the sanitized object.
+     * @param level        The new level of the sanitized object.
+     * @return             {"OK", "NO"}
+     */
+    public String declassifyOL(String subjectName, String objectName, SecurityLevel467 level)
+    {
+        return "";
+    }
+
+    /**
+     * Returns "OK" when the subject can perform the action on the object.
+     *
+     * @param subjectName  The name of the subject.
+     * @param objectName   The name of the object.
+     * @param action       The requested action. {'r', 'w', 'a', 'e'}
+     * @return             {"OK", "NO"}
+     */
+    public String access(String subjectName, String objectName, String action)
+    {
+        return "";
+    }
+
+    public boolean dominates(String subjectName, String objectName)
+    {
+        boolean dom = false;
+
+        // Statement for queries
+        Statement stmt = null;
+
+        String query = "SELECT A.entityName as subj, "
+                + "B.entityName as obj, "
+                + "A.curr_sensitivity as subjLvl, "
+                + "B.curr_sensitivity as objLvl, "
+                + "LPAD(BIN(A.curr_category+0),11,'0') as subjcat, "
+                + "LPAD(BIN(B.curr_category+0),11,'0') as objcat, "
+                + "LPAD(BIN(A.curr_category+0 & B.curr_category+0),11,'0') as result "
+                + "FROM loneclowntheory.entityTable AS A, "
+                + "loneclowntheory.entityTable AS B "
+                + "HAVING subj='" + subjectName
+                + "' AND obj='" + objectName
+                + "' AND objcat=result AND objLvl<=subjLvl;";
+
+        // try-catch block for SQLExceptions
+        try
+        {
+            // Create the statment object
+            stmt = con.createStatement();
+
+            // Get the result set for the query
+            ResultSet rs = stmt.executeQuery(query);
+
+            // check to see if it has at least one row, indicating that the subject does have the right on the entity
+            if (rs.next())
+            {
+                // If so, the return string is set to "OK"
+                dom = true;
+            }
+
+            // Close the result set and statement
+            rs.close();
+            stmt.close();
+        } // Catch any SQLExceptions
+        catch (SQLException e)
+        {
+            // Debug print
+            // System.out.println("In checkRights: " + e);
+            // Failure, so return string set to "NO"
+            dom = false;
+        }
+
+        return dom;
+    }
+
+    private String getCatString(SecurityLevel467 level)
+    {
         String catStr = "'";
 
         for (int i = 0; i < level.categories.length; i++)
@@ -216,132 +323,6 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         {
             catStr = catStr.substring(0, catStr.length() - 1) + "'";
         }
-
-        try
-        {
-            stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-
-            query = "INSERT INTO " + dbName + "." + entityTable
-                    + " (`entityName`, `subject_or_object`, `sensitivity`, `category`) "
-                    + "VALUES ('" + objectName + "','0','" + level.sensitivity.ordinal() + "'," + catStr + ")";
-
-            stmt.executeUpdate(query);
-
-            System.out.println("OK");
-
-            stmt.close();
-        }
-        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
-        {
-            System.out.println("NO");
-        }
-        catch (SQLException e)
-        {
-            System.out.println(e);
-        }
-    }
-
-    /**
-     * Set's a subject's current security clearance to 'level', which must be dominated by the
-     * subject's maximum security level. Returns "OK" on success, "NO" otherwise.
-     *
-     * @param subjectName  The name of the subject.
-     * @param level        The new clearance level of the subject.
-     * @return             {"OK", "NO"}
-     */
-    public String updateSL(String subjectName, SecurityLevel467 level)
-    {
-        return "";
-    }
-
-    /**
-     * Object's current security classification is increased to 'level'. The new level should dominate
-     * the old security classification level of the object. Returns "OK" on success, "NO" otherwise.
-     *
-     * @param objectName  The name of the object.
-     * @param level       The new classification level of the object.
-     * @return            {"OK", "NO"}
-     */
-    public String classifyOL(String objectName, SecurityLevel467 level)
-    {
-        return "";
-    }
-
-    /**
-     * A subject whose clearance dominates the object's classification lowers the security level of
-     * the object. Returns "OK" on success, "NO" otherwise.
-     *
-     * @param subjectName  The name of the subject declassifying the object.
-     * @param objectName   The name of the sanitized object.
-     * @param level        The new level of the sanitized object.
-     * @return             {"OK", "NO"}
-     */
-    public String declassifyOL(String subjectName, String objectName, SecurityLevel467 level)
-    {
-        return "";
-    }
-
-    /**
-     * Returns "OK" when the subject can perform the action on the object.
-     *
-     * @param subjectName  The name of the subject.
-     * @param objectName   The name of the object.
-     * @param action       The requested action. {'r', 'w', 'a', 'e'}
-     * @return             {"OK", "NO"}
-     */
-    public String access(String subjectName, String objectName, String action)
-    {
-        return "";
-    }
-
-    public boolean dominates(String subjectName, String objectName)
-    {
-        boolean dom = false;
-
-        // Statement for queries
-        Statement stmt = null;
-
-        String query = "SELECT A.entityName as subj, "
-                + "B.entityName as obj, "
-                + "A.sensitivity as subjLvl, "
-                + "B.sensitivity as objLvl, "
-                + "LPAD(BIN(A.category+0),11,'0') as subjcat, "
-                + "LPAD(BIN(B.category+0),11,'0') as objcat, "
-                + "LPAD(BIN(A.category+0 & B.category+0),11,'0') as result "
-                + "FROM loneclowntheory.entityTable AS A, "
-                + "loneclowntheory.entityTable AS B "
-                + "HAVING subj='" + subjectName
-                + "' AND obj='" + objectName
-                + "' AND objcat=result AND objLvl<=subjLvl;";
-
-        // try-catch block for SQLExceptions
-        try
-        {
-            // Create the statment object
-            stmt = con.createStatement();
-
-            // Get the result set for the query
-            ResultSet rs = stmt.executeQuery(query);
-
-            // check to see if it has at least one row, indicating that the subject does have the right on the entity
-            if (rs.next())
-            {
-                // If so, the return string is set to "OK"
-                dom = true;
-            }
-
-            // Close the result set and statement
-            rs.close();
-            stmt.close();
-        } // Catch any SQLExceptions
-        catch (SQLException e)
-        {
-            // Debug print
-            // System.out.println("In checkRights: " + e);
-            // Failure, so return string set to "NO"
-            dom = false;
-        }
-
-        return dom;
+        return catStr;
     }
 }

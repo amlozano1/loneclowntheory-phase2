@@ -37,7 +37,7 @@ public class Main
 
             lct = new LCTBellLaPadula467(con, dbms, dbName);
 
-            Category467[] c1 = {};
+            Category467[] c1 = {Category467.AZ,Category467.CA};
             SecurityLevel467 sl = new SecurityLevel467(SensitivityLevel467.SECRET, c1);
             lct.newSubject("s1", sl);
 
@@ -51,9 +51,12 @@ public class Main
 
             Category467[] c4 = {};
             sl = new SecurityLevel467(SensitivityLevel467.CONFIDENTIAL, c4);
-            lct.newSubject("o1", sl);
+            lct.newObject("o1", sl);
 
-            System.out.println(lct.dominates("s2", "s1"));
+            System.out.println(lct.dominates("subject0", "s2"));
+            System.out.println(lct.dominates("s1", "s2"));
+
+            System.out.println(lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2)));
 
             con.close();
         }
