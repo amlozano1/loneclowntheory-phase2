@@ -15,8 +15,10 @@ CREATE  TABLE IF NOT EXISTS `LoneClownTheory`.`entityTable` (
   `entityID` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `entityName` VARCHAR(10) NOT NULL ,
   `subject_or_object` TINYINT(1)  NOT NULL ,
-  `sensitivity` INT UNSIGNED NOT NULL,
-  `category` SET('CA', 'AZ', 'NM', 'TX', 'SFO', 'LAX', 'PHX', 'TUS', 'ABQ', 'IAH', 'DAL'),
+  `max_sensitivity` INT UNSIGNED NOT NULL,
+  `max_category` SET('CA', 'AZ', 'NM', 'TX', 'SFO', 'LAX', 'PHX', 'TUS', 'ABQ', 'IAH', 'DAL'),
+  `curr_sensitivity` INT UNSIGNED NOT NULL,
+  `curr_category` SET('CA', 'AZ', 'NM', 'TX', 'SFO', 'LAX', 'PHX', 'TUS', 'ABQ', 'IAH', 'DAL'),
   PRIMARY KEY (`entityID`) ,
   UNIQUE INDEX `entityName_UNIQUE` (`entityName` ASC) )
 ENGINE = InnoDB;
@@ -59,7 +61,7 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 SET AUTOCOMMIT=0;
 USE `LoneClownTheory`;
-INSERT INTO `LoneClownTheory`.`entityTable` (`entityID`, `entityName`, `subject_or_object`, `sensitivity`, `category`) VALUES (1, 'subject0', 1, 0,'CA,AZ,LAX,SFO,PHX,TUS');
+INSERT INTO `LoneClownTheory`.`entityTable` (`entityID`, `entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`) VALUES (1, 'subject0', 1, 4,'CA,AZ,NM,TX,LAX,SFO,PHX,TUS,ABQ,IAH,DAL', 4,'CA,AZ,NM,TX,LAX,SFO,PHX,TUS,ABQ,IAH,DAL');
 COMMIT;
 
 -- -----------------------------------------------------
