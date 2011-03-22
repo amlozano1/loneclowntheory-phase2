@@ -88,7 +88,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             query = "INSERT INTO " + dbName + "." + entityTable
                     + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`) "
-                    + "VALUES ('" + subjectName + "','1','" + maxLevel.sensitivity.ordinal() + "'," + catStr + ",'" + + maxLevel.sensitivity.ordinal() + "'," + catStr +")";
+                    + "VALUES ('" + subjectName + "','1','" + maxLevel.sensitivity.ordinal() + "'," + catStr + ",'" + + maxLevel.sensitivity.ordinal() + "'," + catStr + ")";
 
             stmt.executeUpdate(query);
 
@@ -126,7 +126,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             query = "INSERT INTO " + dbName + "." + entityTable
                     + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`) "
-                    + "VALUES ('" + objectName + "','0','0','','" + level.sensitivity.ordinal() + "'," + catStr +")";
+                    + "VALUES ('" + objectName + "','0','0','','" + level.sensitivity.ordinal() + "'," + catStr + ")";
 
             stmt.executeUpdate(query);
 
@@ -476,7 +476,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         return dom;
     }
 
-    private String getCatString(SecurityLevel467 level)
+    protected String getCatString(SecurityLevel467 level)
     {
         String catStr = "'";
 
