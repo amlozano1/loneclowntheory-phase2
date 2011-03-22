@@ -272,8 +272,6 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         String query = "";
         Statement stmt = null;
 
-        this.newSubject("temp", level);
-
         if (this.dominates(subjectName, objectName))
         {
             query = "UPDATE " + entityTable +
@@ -296,18 +294,6 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         else
         {
             rtnStr = "NO";
-        }
-
-        query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
-
-        try
-        {
-            stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            stmt.execute(query);
-        }
-        catch (Exception e)
-        {
-            System.out.println(e);
         }
 
         return rtnStr;
