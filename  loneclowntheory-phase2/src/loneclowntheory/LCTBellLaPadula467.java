@@ -44,6 +44,11 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     //define other constants
     public static final String subject0 = "subject0";
 
+    public LCTBellLaPadula467()
+    {
+        super();
+    }
+
     public LCTBellLaPadula467(Connection connArg, String dbmsArg, String dbNameArg)
     {
         super();

@@ -67,9 +67,11 @@ public class Main
 
             System.out.println("1 " + lct.dominates("subject0", "s2"));
 
-            System.out.println("2 " + lct.dominates("s1", "s2"));
+            System.out.println("2.0 " + lct.dominates("s1", "s2"));
+            System.out.println("2.1 " + lct.dominates("s2", "s1"));
 
-            System.out.println("3 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2)));
+            System.out.println("3.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2)));
+            System.out.println("3.1 " + lct.dominates("s2", "s1"));
 
             System.out.println("4.0 " + lct.dominates("s3", "o1"));
 
