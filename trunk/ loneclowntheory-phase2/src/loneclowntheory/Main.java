@@ -182,6 +182,13 @@ public class Main
             System.out.println("10.2 " + lct.access("s3", "o1", "a"));
             System.out.println("10.3 " + lct.access("s3", "o1", "e"));
 
+            Category467[] c5 =
+            {
+                Category467.AZ, Category467.TX
+            };
+            sl = new SecurityLevel467(SensitivityLevel467.SECRET, c5);
+            System.out.println("11.0 " + lct.updateSL("s1", sl));
+
             con.close();
         }
         catch (SQLException e)
