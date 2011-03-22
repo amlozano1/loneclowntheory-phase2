@@ -43,6 +43,25 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
     //define other constants
     public static final String subject0 = "subject0";
 
+    public LCTIntegrityManager467(Connection connArg, String dbmsArg, String dbNameArg)
+    {
+        super();
+        this.con = connArg;
+        this.dbms = dbmsArg;
+        this.dbName = dbNameArg;
+        try
+        {
+            String query = "USE " + dbName;
+            Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            stmt.execute(query);
+            con.setAutoCommit(true);
+        }
+        catch (SQLException e)
+        {
+            System.out.println(e);
+        }
+    }
+
     /**
      * Creates a new subject with a maximum security clearance level, and integrity level.
      *
@@ -166,6 +185,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         return rtnStr;
     }
 
+    @Override
     public boolean dominates(String subjectName, String objectName)
     {
         boolean dom = false;
