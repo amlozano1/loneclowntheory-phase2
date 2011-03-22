@@ -87,13 +87,13 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             stmt.executeUpdate(query);
 
-            System.out.println("OK");
+            //System.out.println("OK");
 
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            System.out.println("NO");
+            //System.out.println("NO");
         }
         catch (SQLException e)
         {
@@ -125,13 +125,13 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             stmt.executeUpdate(query);
 
-            System.out.println("OK");
+            //System.out.println("OK");
 
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            System.out.println("NO");
+            //System.out.println("NO");
         }
         catch (SQLException e)
         {
@@ -151,19 +151,36 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     {
         String rtnStr = "NO";
 
+        String query = "";
+        Statement stmt = null;
+
         this.newSubject("temp", level);
 
-        if (this.dominates(subjectName, "temp"))
+        if (this.maxDominates(subjectName, "temp"))
         {
-            rtnStr = "OK";
+            query = "UPDATE " + entityTable + 
+                    " SET curr_sensitivity = '" + level.sensitivity.ordinal() +
+                    "', curr_category = " + this.getCatString(level) +
+                    " WHERE entityName = '" + subjectName + "';";
+            
+            try
+            {
+                stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                stmt.execute(query);
+                rtnStr = "OK";
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+                rtnStr = "NO";
+            }
         }
         else
         {
             rtnStr = "NO";
         }
 
-        String query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
-        Statement stmt = null;
+        query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
 
         try
         {
@@ -188,7 +205,50 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      */
     public String classifyOL(String objectName, SecurityLevel467 level)
     {
-        return "";
+        String rtnStr = "NO";
+
+        String query = "";
+        Statement stmt = null;
+
+        this.newSubject("temp", level);
+
+        if (this.dominates("temp", objectName))
+        {
+            query = "UPDATE " + entityTable +
+                    " SET curr_sensitivity = '" + level.sensitivity.ordinal() +
+                    "', curr_category = " + this.getCatString(level) +
+                    " WHERE entityName = '" + objectName + "';";
+
+            try
+            {
+                stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                stmt.execute(query);
+                rtnStr = "OK";
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+                rtnStr = "NO";
+            }
+        }
+        else
+        {
+            rtnStr = "NO";
+        }
+
+        query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
+
+        try
+        {
+            stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            stmt.execute(query);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+
+        return rtnStr;
     }
 
     /**
@@ -202,7 +262,50 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      */
     public String declassifyOL(String subjectName, String objectName, SecurityLevel467 level)
     {
-        return "";
+        String rtnStr = "NO";
+
+        String query = "";
+        Statement stmt = null;
+
+        this.newSubject("temp", level);
+
+        if (this.dominates(subjectName, objectName))
+        {
+            query = "UPDATE " + entityTable +
+                    " SET curr_sensitivity = '" + level.sensitivity.ordinal() +
+                    "', curr_category = " + this.getCatString(level) +
+                    " WHERE entityName = '" + objectName + "';";
+
+            try
+            {
+                stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                stmt.execute(query);
+                rtnStr = "OK";
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+                rtnStr = "NO";
+            }
+        }
+        else
+        {
+            rtnStr = "NO";
+        }
+
+        query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
+
+        try
+        {
+            stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            stmt.execute(query);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+
+        return rtnStr;
     }
 
     /**
@@ -215,7 +318,55 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      */
     public String access(String subjectName, String objectName, String action)
     {
-        return "";
+        String rtnStr = "NO";
+
+        boolean simple = false;
+        boolean star = false;
+
+        switch (action.charAt(0))
+        {
+            case 'e':
+            case 'a':
+                simple = true;
+                break;
+            case 'r':
+            case 'w':
+                simple = this.dominates(subjectName, objectName);
+                break;
+            default:
+                simple = false;
+                break;
+        }
+
+        switch (action.charAt(0))
+        {
+            case 'e':
+                star = true;
+                break;
+            case 'a':
+                star = this.dominates(objectName, subjectName);
+                break;
+            case 'r':
+                star = this.dominates(subjectName, objectName);
+                break;
+            case 'w':
+                star = this.dominates(subjectName, objectName) && this.dominates(objectName, subjectName);
+                break;
+            default:
+                star = false;
+                break;
+        }
+
+        if (simple && star)
+        {
+            rtnStr = "OK";
+        }
+        else
+        {
+            rtnStr = "NO";
+        }
+
+        return rtnStr;
     }
 
     public boolean dominates(String subjectName, String objectName)
@@ -232,6 +383,57 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                 + "LPAD(BIN(A.curr_category+0),11,'0') as subjcat, "
                 + "LPAD(BIN(B.curr_category+0),11,'0') as objcat, "
                 + "LPAD(BIN(A.curr_category+0 & B.curr_category+0),11,'0') as result "
+                + "FROM loneclowntheory.entityTable AS A, "
+                + "loneclowntheory.entityTable AS B "
+                + "HAVING subj='" + subjectName
+                + "' AND obj='" + objectName
+                + "' AND objcat=result AND objLvl<=subjLvl;";
+
+        // try-catch block for SQLExceptions
+        try
+        {
+            // Create the statment object
+            stmt = con.createStatement();
+
+            // Get the result set for the query
+            ResultSet rs = stmt.executeQuery(query);
+
+            // check to see if it has at least one row, indicating that the subject does have the right on the entity
+            if (rs.next())
+            {
+                // If so, the return string is set to "OK"
+                dom = true;
+            }
+
+            // Close the result set and statement
+            rs.close();
+            stmt.close();
+        } // Catch any SQLExceptions
+        catch (SQLException e)
+        {
+            // Debug print
+            // System.out.println("In checkRights: " + e);
+            // Failure, so return string set to "NO"
+            dom = false;
+        }
+
+        return dom;
+    }
+
+    public boolean maxDominates(String subjectName, String objectName)
+    {
+        boolean dom = false;
+
+        // Statement for queries
+        Statement stmt = null;
+
+        String query = "SELECT A.entityName as subj, "
+                + "B.entityName as obj, "
+                + "A.max_sensitivity as subjLvl, "
+                + "B.curr_sensitivity as objLvl, "
+                + "LPAD(BIN(A.max_category+0),11,'0') as subjcat, "
+                + "LPAD(BIN(B.curr_category+0),11,'0') as objcat, "
+                + "LPAD(BIN(A.max_category+0 & B.curr_category+0),11,'0') as result "
                 + "FROM loneclowntheory.entityTable AS A, "
                 + "loneclowntheory.entityTable AS B "
                 + "HAVING subj='" + subjectName
