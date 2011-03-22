@@ -147,7 +147,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
      *
      * @param subjectName  The name of the subject.
      * @param objectName   The name of the object.
-     * @param action       The requested action. {'r', 'u', 'w'}
+     * @param action       The requested action. {'r', 'u', 'w'} // NOTE: Per Mike -> {'r', 'w', 'a', 'e'}
      * @return             {"OK", "NO"}
      */
     @Override
