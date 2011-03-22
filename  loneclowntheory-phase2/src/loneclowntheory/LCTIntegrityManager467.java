@@ -196,7 +196,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         String query = "SELECT A.entityName as subj, "
                 + "B.entityName as obj, "
                 + "A.integrity as subjInteg, "
-                + "B.integrity as objInteg, "
+                + "B.integrity as objInteg "
                 + "FROM loneclowntheory.entityTable AS A, "
                 + "loneclowntheory.entityTable AS B "
                 + "HAVING subj='" + subjectName
@@ -226,7 +226,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         catch (SQLException e)
         {
             // Debug print
-            // System.out.println("In checkRights: " + e);
+            System.out.println("In checkRights: " + e);
             // Failure, so return string set to "NO"
             dom = false;
         }
