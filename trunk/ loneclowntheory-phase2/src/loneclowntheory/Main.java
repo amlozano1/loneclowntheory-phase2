@@ -71,15 +71,15 @@ public class Main
 
             System.out.println("3 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2)));
 
-            System.out.println("3.1 " + lct.dominates("s3", "o1"));
+            System.out.println("4.0 " + lct.dominates("s3", "o1"));
 
-            System.out.println("4 " + lct.classifyOL("o1", new SecurityLevel467(SensitivityLevel467.SECRET, c2)));
+            System.out.println("4.1 " + lct.classifyOL("o1", new SecurityLevel467(SensitivityLevel467.SECRET, c2)));
 
-            System.out.println("4.1 " + lct.dominates("s3", "o1"));
+            System.out.println("4.2 " + lct.dominates("s3", "o1"));
 
             System.out.println("5 " + lct.declassifyOL("s3", "o1", sl));
 
-            //System.out.println("6 " + lct.declassifyOL("subject0", "o1", sl));
+            System.out.println("6 " + lct.declassifyOL("subject0", "o1", sl));
 
             System.out.println("7.0 " + lct.access("subject0", "o1", "r"));
             System.out.println("7.1 " + lct.access("subject0", "o1", "w"));
