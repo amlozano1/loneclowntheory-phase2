@@ -30,9 +30,8 @@ import java.sql.SQLException;
  */
 public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements IntegrityManager467
 {
-    // DB connection information
 
-    protected String dbName = "LoneClownTheory_biba";
+    //define columns in entityTable
     public static final String integ = "integrity";
 
     /**
@@ -44,6 +43,8 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
     public LCTIntegrityManager467()
     {
         super();
+        this.dbms = "mysql";
+        this.dbName = "LoneClownTheory_biba";
         try
         {
             this.con = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "root");
