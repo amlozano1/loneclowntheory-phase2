@@ -1,8 +1,20 @@
 /**
+ * Lone Clown Theory
+ * 
+ * Brandon Andersen
+ * Brian Arvidson
+ * Anthony Lozano
+ * Justin Paglierani
+ * 
+ * CSE 467/598
+ * Spring 2011
+ * Prof. Ahn
  *
+ * LCTBellLaPadula467
  */
 package loneclowntheory;
 
+// imports
 import java.sql.Connection;
 import java.sql.Statement;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
@@ -13,24 +25,19 @@ import java.sql.SQLException;
 /**
  * Policy manager for the Bell-LaPadula Model. See Section 5.2 in the textbook.
  *
- * @author TA
+ * @author Lone Clown Theory
  *
  */
 public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellLaPadula467
 {
-    private String dbms;
-    private String dbName;
-    private Connection con;
-    //define table names
-//    public static final String acm = "acm";
-//    public static final String entityTable = "entityTable";
-    ///define columns in acm
-//    public static final String subject = acm + ".subject";
-//    public static final String entity = acm + ".entity";
-//    public static final String right = acm + ".right";
-//    public static final String granter = acm + ".granter";
-//    public static final String timestamp = acm + ".timestamp";
-    //define rights for acm
+    // DB connection information
+    protected String dbms = "mysql";
+    protected String connStr = "jdbc:mysql://localhost:3306";
+    protected String user = "root";
+    protected String pwd = "root";
+    protected String dbName = "LoneClownTheory_blp";
+    protected Connection con;
+    // permissions
     public static final char read_only = 'r';
     public static final char read_write = 'w';
     public static final char write_only = 'a';
@@ -43,23 +50,19 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     public static final String max_category = "max_category";
     public static final String curr_sensitivity = "curr_sensitivity";
     public static final String curr_category = "curr_category";
-    //define other constants
-//    public static final String subject0 = "subject0";
 
+    /**
+     * Default constructor:
+     *
+     * Creates the necessary DB connection without passing external parameters
+     *
+     */
     public LCTBellLaPadula467()
     {
         super();
-
-        String connStr = "jdbc:mysql://localhost:3306";
-        String user = "root";
-        String pwd = "root";
-        this.dbms = "mysql";
-        this.dbName = "LoneClownTheory_blp";
-
         try
         {
             this.con = DriverManager.getConnection(connStr, user, pwd);
-
             String query = "USE " + dbName;
             Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             stmt.execute(query);
@@ -71,6 +74,12 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         }
     }
 
+    /**
+     * Parameterized constructor:
+     *
+     * Accepts DB connection information supplied externally
+     *
+     */
     public LCTBellLaPadula467(Connection connArg, String dbmsArg, String dbNameArg)
     {
         super();
@@ -95,17 +104,20 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      *
      * @param subjectName The new subject's name.
      * @param maxLevel    The subject's maximum security level.
+     * @author Brian Arvidson
      */
     public void newSubject(String subjectName, SecurityLevel467 maxLevel)
     {
-        Statement stmt = null;
-        String query = "";
-        String catStr = this.getCatString(maxLevel);
+        Statement stmt = null; // sql statement
+        String query = ""; // query string
+        String catStr = this.getCatString(maxLevel); // get the categories as a string
 
         try
         {
+            // create a statement
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
+            // query to insert a new subject into DB
             query = "INSERT INTO " + dbName + "." + entityTable
                     + " (`" + entityName + "`,`"
                     + subjectOrObject + "`,`"
@@ -121,7 +133,18 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                     + +maxLevel.sensitivity.ordinal() + "',"
                     + catStr + ")";
 
+            // execute the query, print result and close statement
             stmt.executeUpdate(query);
+
+            //Add to acm table subject 0 is root owner
+            query = "INSERT INTO " + dbName + "." + acm
+                    + " (`subject`, `entity`, `granter`, `right`"
+                    + ") VALUES ('subject0', '"
+                    + subjectName
+                    + "', 'subject0', 'o')";
+
+            stmt.executeUpdate(query); //execute (insert the row)
+
             System.out.println("OK");
             stmt.close();
         }
@@ -129,7 +152,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         {
             System.out.println("NO");
         }
-        catch (SQLException e)
+        catch (SQLException e) // Other sql exceptions
         {
             System.out.println("NO");
         }
@@ -140,17 +163,23 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      *
      * @param objectName  The new object's name.
      * @param level       The classification of the new object.
+     * @author Brian Arvidson
      */
     public void newObject(String objectName, SecurityLevel467 level)
     {
-        Statement stmt = null;
-        String query = "";
-        String catStr = this.getCatString(level);
+        Statement stmt = null; // sql statement
+        String query = ""; // query string
+        String catStr = this.getCatString(level); // get the categories as a string
 
         try
         {
+            // create a statement
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
+            // query string to insert new object
+            // Note: the object's max_sensitivity and max_category
+            // is set to default minimum values since they don't apply
+            // to objects
             query = "INSERT INTO " + dbName + "." + entityTable
                     + " (`" + entityName + "`,`"
                     + subjectOrObject + "`,`"
@@ -164,7 +193,18 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                     + level.sensitivity.ordinal() + "',"
                     + catStr + ")";
 
+            // execute the query, print results and close statement
             stmt.executeUpdate(query);
+
+            //Add to acm table subject 0 is root owner
+            query = "INSERT INTO " + dbName + "." + acm
+                    + " (`subject`, `entity`, `granter`, `right`"
+                    + ") VALUES ('subject0', '"
+                    + objectName
+                    + "', 'subject0', 'o')";
+
+            stmt.executeUpdate(query); //execute (insert the row)
+
             System.out.println("OK");
             stmt.close();
         }
@@ -172,7 +212,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         {
             System.out.println("NO");
         }
-        catch (SQLException e)
+        catch (SQLException e) // other sql exceptions
         {
             System.out.println("NO");
         }
@@ -185,17 +225,24 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      * @param subjectName  The name of the subject.
      * @param level        The new clearance level of the subject.
      * @return             {"OK", "NO"}
+     * @author Brandon Andersen
      */
     public String updateSL(String subjectName, SecurityLevel467 level)
     {
-        String rtnStr = "NO";
-        String query = "";
-        Statement stmt = null;
+        String rtnStr = "NO"; // return string
+        String query = ""; // query string
+        Statement stmt = null; // sql statement
 
+        // create a temporary subject with the new level to allow testing
+        // dominance inside the DB itself
         this.newSubject("temp", level);
 
+        // see if the subject to have its SL updated dominates (based on max level)
+        // the temp subject with the level to update to
         if (this.maxDominates(subjectName, "temp"))
         {
+            // if so, create update query to update subject's current
+            // level to the new level
             query = "UPDATE " + entityTable
                     + " SET " + curr_sensitivity + " = '" + level.sensitivity.ordinal()
                     + "', " + curr_category + " = " + this.getCatString(level)
@@ -203,34 +250,41 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             try
             {
+                // create and execute the query
                 stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
                 stmt.execute(query);
                 rtnStr = "OK";
+                stmt.close();
             }
-            catch (Exception e)
+            catch (SQLException e) // handle sql exceptions
             {
                 System.out.println(e);
                 rtnStr = "NO";
             }
         }
+        // if the new level is not dominated by the subjects max level
         else
         {
             rtnStr = "NO";
         }
 
+        // query to delete temp subject created for testing
         query = "DELETE FROM " + entityTable
                 + " WHERE " + entityName + "='temp';";
 
         try
         {
+            // create and execute the statement
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             stmt.execute(query);
+            stmt.close();
         }
-        catch (Exception e)
+        catch (SQLException e) // handle sql exceptions
         {
             System.out.println(e);
         }
 
+        // return the result
         return rtnStr;
     }
 
@@ -241,17 +295,22 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      * @param objectName  The name of the object.
      * @param level       The new classification level of the object.
      * @return            {"OK", "NO"}
+     * @author Anthony Lozano
      */
     public String classifyOL(String objectName, SecurityLevel467 level)
     {
-        String rtnStr = "NO";
-        String query = "";
-        Statement stmt = null;
+        String rtnStr = "NO"; // return string
+        String query = ""; // query string
+        Statement stmt = null; // sql statement
 
-        this.newSubject("temp", level);
+        // create a temporary object to allow comparison within the DB using
+        // dominates with the new level
+        this.newObject("temp", level);
 
+        // See if the new level dominates the object's current level
         if (this.dominates("temp", objectName))
         {
+            // if so, create update query to update object's current level
             query = "UPDATE " + entityTable
                     + " SET " + curr_sensitivity + " = '" + level.sensitivity.ordinal()
                     + "', " + curr_category + " = " + this.getCatString(level)
@@ -259,34 +318,41 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             try
             {
+                // execute the query
                 stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
                 stmt.execute(query);
                 rtnStr = "OK";
+                stmt.close();
             }
-            catch (Exception e)
+            catch (SQLException e) // handle sql exceptions
             {
                 System.out.println(e);
                 rtnStr = "NO";
             }
         }
+        // If new level did not dominate current level
         else
         {
             rtnStr = "NO";
         }
 
+        // query to delete temp object
         query = "DELETE FROM " + entityTable
                 + " WHERE " + entityName + "='temp';";
 
         try
         {
+            // execute query to delete temp object
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             stmt.execute(query);
+            stmt.close();
         }
-        catch (Exception e)
+        catch (SQLException e) // handle sql exceptions
         {
             System.out.println(e);
         }
 
+        // reutrn the result
         return rtnStr;
     }
 
@@ -298,16 +364,20 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      * @param objectName   The name of the sanitized object.
      * @param level        The new level of the sanitized object.
      * @return             {"OK", "NO"}
+     * @author Justin Paglierani
      */
     public String declassifyOL(String subjectName, String objectName, SecurityLevel467 level)
     {
-        String rtnStr = "NO";
+        String rtnStr = "NO"; //return string
+        String query = ""; // query string
+        Statement stmt = null; // sql statement
 
-        String query = "";
-        Statement stmt = null;
-
+        // check to see if the subject trying to declass the object dominates
+        // the object
         if (this.dominates(subjectName, objectName))
         {
+            // if so, create a query to update the objects current level to
+            // the new level
             query = "UPDATE " + entityTable
                     + " SET " + curr_sensitivity + " = '" + level.sensitivity.ordinal()
                     + "', " + curr_category + " = " + this.getCatString(level)
@@ -315,21 +385,24 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             try
             {
+                // create and execute the update query
                 stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
                 stmt.execute(query);
                 rtnStr = "OK";
             }
-            catch (Exception e)
+            catch (SQLException e) // handle sql exceptions
             {
                 System.out.println(e);
                 rtnStr = "NO";
             }
         }
+        // case where the subject's level does not dominate the objects level
         else
         {
             rtnStr = "NO";
         }
 
+        // return result
         return rtnStr;
     }
 
@@ -340,22 +413,27 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
      * @param objectName   The name of the object.
      * @param action       The requested action. {'r', 'w', 'a', 'e'}
      * @return             {"OK", "NO"}
+     * @author Brian Arvidson
      */
     public String access(String subjectName, String objectName, String action)
     {
-        String rtnStr = "NO";
+        String rtnStr = "NO"; // return string
 
+        // booleans for testing conditions
         boolean simple = false;
         boolean star = false;
 
+        // test conditions for simple property based on action
         switch (action.charAt(0))
         {
             case execute:
             case write_only:
+                // no reading occuring so no info flow
                 simple = true;
                 break;
             case read_only:
             case read_write:
+                // reading occuring so flow of read info must be up
                 simple = this.dominates(subjectName, objectName);
                 break;
             default:
@@ -363,18 +441,23 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                 break;
         }
 
+        // test conditions for star property based on action
         switch (action.charAt(0))
         {
             case execute:
+                // no info flow so okay
                 star = true;
                 break;
             case write_only:
+                // only appending, so flow of write data must be up
                 star = this.dominates(objectName, subjectName);
                 break;
             case read_only:
+                // only reading, so flow of read data must be up
                 star = this.dominates(subjectName, objectName);
                 break;
             case read_write:
+                // reading and writing, so flow of data must be horizontal
                 star = this.dominates(subjectName, objectName) && this.dominates(objectName, subjectName);
                 break;
             default:
@@ -382,7 +465,8 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                 break;
         }
 
-        if (simple && star)
+        // check conditions and assign return string result
+        if (simple && star && this.checkRights(objectName, subjectName, action).equals("OK"))
         {
             rtnStr = "OK";
         }
@@ -391,16 +475,27 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             rtnStr = "NO";
         }
 
+        // return result
         return rtnStr;
     }
 
-    public boolean dominates(String subjectName, String objectName)
+    /**
+     * Returns true when the subject current level dominates object level.
+     *
+     * @param subjectName  The name of the subject.
+     * @param objectName   The name of the object.
+     * @return             {true, false}
+     * @author Brandon Andersen
+     */
+    protected boolean dominates(String subjectName, String objectName)
     {
+        // result bool
         boolean dom = false;
 
         // Statement for queries
         Statement stmt = null;
 
+        // query to test dominance within DB
         String query = "SELECT A.entityName as subj, "
                 + "B.entityName as obj, "
                 + "A.curr_sensitivity as subjLvl, "
@@ -423,7 +518,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             // Get the result set for the query
             ResultSet rs = stmt.executeQuery(query);
 
-            // check to see if it has at least one row, indicating that the subject does have the right on the entity
+            // check to see if it has at least one row, indicating that the subject dominates object
             if (rs.next())
             {
                 // If so, the return string is set to "OK"
@@ -436,22 +531,31 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         } // Catch any SQLExceptions
         catch (SQLException e)
         {
-            // Debug print
-            // System.out.println("In checkRights: " + e);
-            // Failure, so return string set to "NO"
+            System.out.println("In dominates: " + e);
             dom = false;
         }
 
+        // return the result
         return dom;
     }
 
-    public boolean maxDominates(String subjectName, String objectName)
+    /**
+     * Returns true when the subject max level dominates object level.
+     *
+     * @param subjectName  The name of the subject.
+     * @param objectName   The name of the object.
+     * @return             {true, false}
+     * @author Brandon Andersen
+     */
+    protected boolean maxDominates(String subjectName, String objectName)
     {
+        // return bool
         boolean dom = false;
 
         // Statement for queries
         Statement stmt = null;
 
+        // query to check if subject max level dominates object level
         String query = "SELECT A.entityName as subj, "
                 + "B.entityName as obj, "
                 + "A.max_sensitivity as subjLvl, "
@@ -474,7 +578,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             // Get the result set for the query
             ResultSet rs = stmt.executeQuery(query);
 
-            // check to see if it has at least one row, indicating that the subject does have the right on the entity
+            // check to see if it has at least one row, indicating that the subject dominates object
             if (rs.next())
             {
                 // If so, the return string is set to "OK"
@@ -487,19 +591,29 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         } // Catch any SQLExceptions
         catch (SQLException e)
         {
-            // Debug print
-            // System.out.println("In checkRights: " + e);
-            // Failure, so return string set to "NO"
+            System.out.println("In maxDominates: " + e);
             dom = false;
         }
 
+        //return the result
         return dom;
     }
 
+    /**
+     * Returns string representing the list of categories
+     *
+     * @param level         SecurityLevel467
+     * @return              String
+     * @author Brandon Andersen
+     */
     protected String getCatString(SecurityLevel467 level)
     {
+        // return string
         String catStr = "'";
 
+        // loop through category array to collect categories into a string
+        // Note: if a state is found, also assign its cities since the cities
+        // are subsets of states
         for (int i = 0; i < level.categories.length; i++)
         {
             switch (level.categories[i])
@@ -542,14 +656,181 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             }
         }
 
+        // check to see if length is 1, indicates empty category set
         if (catStr.length() == 1)
         {
+            // if empty, just return an empty single paren set
             catStr = "''";
         }
         else
         {
+            // otherwise, clip of the trailing comma and append a single paren
             catStr = catStr.substring(0, catStr.length() - 1) + "'";
         }
+
+        //return the resulting string
         return catStr;
+    }
+
+    /**
+     * Subject X revokes right R on the entity E_Name from subject Y.
+     *
+     * @param X         Revoker of the right
+     * @param Y         Subject whose right is being revoked
+     * @param R         {"r", "u", "c", "o", "d", "t"}
+     * @param E_Name    The entity on which Y's right is being revoked
+     * @return          "OK" on success, "NO" otherwise
+     * @author Brandon
+     */
+    public String revoke(String X, String Y, String R, String E_Name)
+    {
+        // The return string, initially assumed to be "NO"
+        String rtnStr = "NO";
+
+        // First, check to see that we are not trying to revoke from subject0
+        // since this is not allowed
+        if (Y.equals(subject0))
+        {
+            rtnStr = "NO";
+        } // Trying to revoke from a subject other than subject0, so keep going
+        else
+        {
+            // Check to see if the revoker (X) is the owner of the entity (E_Name)
+            if (this.checkRights(E_Name, X, own).equals("OK"))
+            {
+                // Create the query string to check for if the subject (Y) has
+                // the right (R) on the entity (E_Name) in question
+                String query = "SELECT * FROM " + dbName + "." + acm
+                        + " WHERE " + subject + " = '" + Y
+                        + "' AND " + entity + " = '" + E_Name
+                        + "' AND " + right + " = '" + R + "'";
+
+                // try-catch block for SQLExceptions
+                try
+                {
+                    // Create a Statement object that will produce updateable result sets
+                    Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+
+                    // Get the result set for the query
+                    ResultSet rs = stmt.executeQuery(query);
+
+                    // Test the result set to see if it is updateble
+                    if (rs.getConcurrency() == ResultSet.CONCUR_UPDATABLE)
+                    {
+                        // Check to see if it has at least one row
+                        if (rs.next())
+                        {
+                            // If trying to revoke 'o', make sure the revoker (X) is subject0
+                            if (R.equals(own) && X.equals(subject0))
+                            {
+                                // Revoke ownership from revokee on the given entity
+                                do
+                                {
+                                    rs.deleteRow();
+                                }
+                                while (rs.next());
+
+                                // return string is "OK" since we at least revoked ownership
+                                rtnStr = "OK";
+                            }
+                            else
+                            {
+                                // Revoke any 'd', 't', 'r', 'u' from revokee on the given entity
+                                do
+                                {
+                                    rs.deleteRow();
+                                }
+                                while (rs.next());
+
+                                // Resturn string is "OK" since we at least revoked one right
+                                rtnStr = "OK";
+                            }
+                        } // If the right trying to be revoked is not present for the subject on the entity
+                        else
+                        {
+                            rtnStr = "NO";
+                        }
+                    } // If the result set for the rights was not updateable
+                    else
+                    {
+                        rtnStr = "NO";
+                    }
+
+                    // Close the result set and statment
+                    rs.close();
+                    stmt.close();
+                } // Catch block for SQLExceptions
+                catch (SQLException e)
+                {
+                    // Debug print
+                    // System.out.println("In Revoke: " + e);
+                    // Failure, so return string set to "NO"
+                    rtnStr = "NO";
+                }
+            } // Someone other than an owner of E_Name is trying to revoke, not allowed
+            else
+            {
+                rtnStr = "NO";
+            }
+        }
+
+        // Return the final return string, either "OK" if at least one right was revoked, otherwise "NO"
+        return rtnStr;
+    }
+
+    /**
+     * Queries the acm table if subject X has right R on entity E_Name.
+     *
+     * @param E_Name  Entity on which subject's rights are being checked
+     * @param X       Subject whose right is being checked
+     * @param R       {"r", "u", "c", "o", "d", "t"}
+     * @return        "OK" on success, "NO" otherwise
+     */
+    @Override
+    public String checkRights(String E_Name, String X, String R)
+    {
+        // Return string initialized to "NO"
+        String rtnStr = "NO";
+
+        // Statement for queries
+        Statement stmt = null;
+
+        // Query string to check if the subject (X) has right (R) on entity (E_Name)
+        String query = "SELECT " + subject + ", " + entity + ", " + right
+                + " FROM " + dbName + "." + acm
+                + " WHERE " + subject + " = '" + X
+                + "' AND " + entity + " = '" + E_Name
+                + "' AND " + right + " = '" + R + "'";
+
+        // try-catch block for SQLExceptions
+        try
+        {
+            // Create the statment object
+            stmt = con.createStatement();
+
+            // Get the result set for the query
+            ResultSet rs = stmt.executeQuery(query);
+
+            // check to see if it has at least one row, indicating that the subject does have the right on the entity
+            if (rs.next())
+            {
+                // If so, the return string is set to "OK"
+                rtnStr = "OK";
+            }
+
+            // Close the result set and statement
+            rs.close();
+            stmt.close();
+        } // Catch any SQLExceptions
+        catch (SQLException e)
+        {
+            // Debug print
+            // System.out.println("In checkRights: " + e);
+            // Failure, so return string set to "NO"
+            rtnStr = "NO";
+        }
+
+        // Return the return string, either "OK" on success or "NO" on failure
+        return rtnStr;
     }
 }

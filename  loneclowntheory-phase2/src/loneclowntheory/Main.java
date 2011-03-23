@@ -1,4 +1,4 @@
-    /*
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -24,20 +24,6 @@ public class Main
     {
         LCTBellLaPadula467 lct;
         LCTIntegrityManager467 lctInteg;
-
-//        Connection con = null;
-//
-//        String connStr = "jdbc:mysql://localhost:3306";
-//        String user = "root";
-//        String pwd = "root";
-//        String dbms = "mysql";
-//        String dbName = "LoneClownTheory";
-
-//        try
-//        {
-//            con = DriverManager.getConnection(connStr, user, pwd);
-//
-//            lct = new LCTBellLaPadula467(con, dbms, dbName);
 
         System.out.println("*** TESTING BLP ***");
 
@@ -115,19 +101,6 @@ public class Main
         sl = new SecurityLevel467(SensitivityLevel467.SECRET, c5);
         System.out.println("11.0 " + lct.updateSL("s1", sl));
 
-//            con.close();
-//        }
-//        catch (SQLException e)
-//        {
-//            System.out.println(e);
-//        }
-
-//        try
-//        {
-//            con = DriverManager.getConnection(connStr, user, pwd);
-//
-//            lctInteg = new LCTIntegrityManager467(con, dbms, dbName);
-        
         System.out.println("*** TESTING BIBA ***");
 
         lctInteg = new LCTIntegrityManager467();
@@ -172,12 +145,5 @@ public class Main
         System.out.println("10.0 " + lctInteg.access("s3", "o1", "r"));
         System.out.println("10.1 " + lctInteg.access("s3", "o1", "w"));
         System.out.println("10.3 " + lctInteg.access("s3", "o1", "e"));
-
-//            con.close();
-//        }
-//        catch (SQLException e)
-//        {
-//            System.out.println(e);
-//        }
     }
 }

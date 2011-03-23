@@ -1,9 +1,21 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Lone Clown Theory
+ *
+ * Brandon Andersen
+ * Brian Arvidson
+ * Anthony Lozano
+ * Justin Paglierani
+ *
+ * CSE 467/598
+ * Spring 2011
+ * Prof. Ahn
+ *
+ * LCTIntegrityManager467
  */
+
 package loneclowntheory;
 
+// imports
 import java.sql.Connection;
 import java.sql.Statement;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
@@ -12,50 +24,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * Integrity manager module.  See Section 6.2 in the textbook.
  *
- * @author Brandon
+ * @author Lone Clown Theory
+ *
  */
 public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements IntegrityManager467
 {
-    private String dbms;
-    private String dbName;
-    private Connection con;
-    //define table names
-//    public static final String acm = "acm";
-//    public static final String entityTable = "entityTable";
-    ///define columns in acm
-//    public static final String subject = acm + ".subject";
-//    public static final String entity = acm + ".entity";
-//    public static final String right = acm + ".right";
-//    public static final String granter = acm + ".granter";
-//    public static final String timestamp = acm + ".timestamp";
-    //define rights for acm
-//    public static final char read_only = 'r';
-//    public static final char read_write = 'w';
-//    public static final char write_only = 'a';
-//    public static final char execute = 'e';
-    //define columns in entityTable
-    public static final String entityID = "entityID";
-    public static final String entityName = "entityName";
-    public static final String subjectOrObject = "subject_or_object";
-    public static final String max_sensitivity = "max_sensitivity";
-    public static final String max_category = "max_category";
-    public static final String curr_sensitivity = "curr_sensitivity";
-    public static final String curr_category = "curr_category";
+    // DB connection information
+    protected String dbName = "LoneClownTheory_biba";
     public static final String integ = "integrity";
-    //define other constants
-//    public static final String subject0 = "subject0";
-
+    
+    /**
+     * Default constructor:
+     *
+     * Creates the necessary DB connection without passing external parameters
+     *
+     */
     public LCTIntegrityManager467()
     {
         super();
-
-        String connStr = "jdbc:mysql://localhost:3306";
-        String user = "root";
-        String pwd = "root";
-        this.dbms = "mysql";
-        this.dbName = "LoneClownTheory_biba";
-
         try
         {
             this.con = DriverManager.getConnection(connStr, user, pwd);
@@ -71,6 +59,12 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         }
     }
 
+    /**
+     * Parameterized constructor:
+     *
+     * Accepts DB connection information supplied externally
+     *
+     */
     public LCTIntegrityManager467(Connection connArg, String dbmsArg, String dbNameArg)
     {
         super();
@@ -96,17 +90,20 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
      * @param subjectName The new subject's name.
      * @param maxLevel    The subject's maximum security level.
      * @param integrity   The subject's integrity level.
+     * @author Brian Arvidson
      */
     public void newSubject(String subjectName, SecurityLevel467 maxLevel, IntLevel467 integrity)
     {
-        Statement stmt = null;
-        String query = "";
-        String catStr = this.getCatString(maxLevel);
+        Statement stmt = null; // sql statement
+        String query = ""; // query string
+        String catStr = this.getCatString(maxLevel); // category string
 
         try
         {
+            // create the statement
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
+            // query to insert new subject
             query = "INSERT INTO " + dbName + "." + entityTable
                     + " (`" + entityName + "`,`"
                     + subjectOrObject + "`,`"
@@ -124,7 +121,18 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
                     + catStr + ",'"
                     + integrity.ordinal() + "')";
 
+            // execute the query, print result and close statement
             stmt.executeUpdate(query);
+
+            //Add to acm table subject 0 is root owner
+            query = "INSERT INTO " + dbName + "." + acm
+                    + " (`subject`, `entity`, `granter`, `right`"
+                    + ") VALUES ('subject0', '"
+                    + subjectName
+                    + "', 'subject0', 'o')";
+
+            stmt.executeUpdate(query); //execute (insert the row)
+
             System.out.println("OK");
             stmt.close();
         }
@@ -132,7 +140,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         {
             System.out.println("NO");
         }
-        catch (SQLException e)
+        catch (SQLException e) // Other sql exceptions
         {
             System.out.println("NO");
         }
@@ -144,17 +152,23 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
      * @param objectName  The new object's name.
      * @param level       The classification of the new object.
      * @param integrity   The object's integrity level.
+     * @author Brian Arvidson
      */
     public void newObject(String objectName, SecurityLevel467 level, IntLevel467 integrity)
     {
-        Statement stmt = null;
-        String query = "";
-        String catStr = this.getCatString(level);
+        Statement stmt = null; // sql statement
+        String query = ""; // query string
+        String catStr = this.getCatString(level); // category string
 
         try
         {
+            // create the statement
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
+            // query string to insert new object
+            // Note: the object's max_sensitivity and max_category
+            // is set to default minimum values since they don't apply
+            // to objects
             query = "INSERT INTO " + dbName + "." + entityTable
                     + " (`" + entityName + "`,`"
                     + subjectOrObject + "`,`"
@@ -170,7 +184,18 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
                     + catStr + ",'"
                     + integrity.ordinal() + "')";
 
+            // execute the query, print results and close statement
             stmt.executeUpdate(query);
+
+            //Add to acm table subject 0 is root owner
+            query = "INSERT INTO " + dbName + "." + acm
+                    + " (`subject`, `entity`, `granter`, `right`"
+                    + ") VALUES ('subject0', '"
+                    + objectName
+                    + "', 'subject0', 'o')";
+
+            stmt.executeUpdate(query); //execute (insert the row)
+
             System.out.println("OK");
             stmt.close();
         }
@@ -178,7 +203,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         {
             System.out.println("NO");
         }
-        catch (SQLException e)
+        catch (SQLException e) // Other sql exceptions
         {
             System.out.println("NO");
         }
@@ -193,26 +218,32 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
      * @param objectName   The name of the object.
      * @param action       The requested action. {'r', 'u', 'w'} // NOTE: Per Mike -> {'r', 'w', 'a', 'e'}
      * @return             {"OK", "NO"}
+     * @author Justin Paglierani
      */
     @Override
     public String access(String subjectName, String objectName, String action)
     {
-        String rtnStr = "NO";
+        String rtnStr = "NO"; // return string
 
-        boolean result = false;
+        boolean result = false; // return bool
 
+        // check conditions based on BIBA
         switch (action.charAt(0))
         {
             case read_only:
+                // reading occuring so flow of read info must be down
                 result = this.dominates(objectName, subjectName);
                 break;
             case write_only:
+                // writing occuring so flow of write data must be down
                 result = this.dominates(subjectName, objectName);
                 break;
             case read_write:
+                // reading and writing so flow of info must be horizontal
                 result = this.dominates(subjectName, objectName) && this.dominates(objectName, subjectName);
                 break;
             case execute:
+                // executing so info flow must be down
                 result = this.dominates(subjectName, objectName);
                 break;
             default:
@@ -220,6 +251,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
                 break;
         }
 
+        // set return string based on result
         if (result)
         {
             rtnStr = "OK";
@@ -229,17 +261,27 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
             rtnStr = "NO";
         }
 
+        //return the result
         return rtnStr;
     }
 
+    /**
+     * Returns true when the subject integrity level dominates object integrity level.
+     *
+     * @param subjectName  The name of the subject.
+     * @param objectName   The name of the object.
+     * @return             {true, false}
+     * @author Brandon Andersen
+     */
     @Override
     public boolean dominates(String subjectName, String objectName)
     {
-        boolean dom = false;
+        boolean dom = false; // return bool
 
         // Statement for queries
         Statement stmt = null;
 
+        // query to check if subject integrity is >= object integrity
         String query = "SELECT A.entityName as subj, "
                 + "B.entityName as obj, "
                 + "A.integrity as subjInteg, "
@@ -259,7 +301,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
             // Get the result set for the query
             ResultSet rs = stmt.executeQuery(query);
 
-            // check to see if it has at least one row, indicating that the subject does have the right on the entity
+            // check to see if it has at least one row, indicating subject integrity is >= object integrity
             if (rs.next())
             {
                 // If so, the return string is set to "OK"
@@ -272,10 +314,11 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         } // Catch any SQLExceptions
         catch (SQLException e)
         {
-            System.out.println("In checkRights: " + e);
+            System.out.println("In dominates: " + e);
             dom = false;
         }
 
+        // return results
         return dom;
     }
 }
