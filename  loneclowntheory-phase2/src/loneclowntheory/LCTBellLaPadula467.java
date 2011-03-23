@@ -30,9 +30,7 @@ import java.sql.SQLException;
  */
 public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellLaPadula467
 {
-    // DB connection information
-
-    protected String dbName = "LoneClownTheory_blp";
+    
     // permissions
     public static final char read_only = 'r';
     public static final char read_write = 'w';
@@ -56,6 +54,8 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     public LCTBellLaPadula467()
     {
         super();
+        this.dbms = "mysql";
+        this.dbName = "LoneClownTheory_blp";
         try
         {
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "root");
