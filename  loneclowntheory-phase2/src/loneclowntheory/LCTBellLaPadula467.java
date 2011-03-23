@@ -6,6 +6,7 @@ package loneclowntheory;
 import java.sql.Connection;
 import java.sql.Statement;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -17,36 +18,57 @@ import java.sql.SQLException;
  */
 public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellLaPadula467
 {
-
     private String dbms;
     private String dbName;
     private Connection con;
     //define table names
-    public static final String acm = "acm";
-    public static final String entityTable = "entityTable";
+//    public static final String acm = "acm";
+//    public static final String entityTable = "entityTable";
     ///define columns in acm
-    public static final String subject = acm + ".subject";
-    public static final String entity = acm + ".entity";
-    public static final String right = acm + ".right";
-    public static final String granter = acm + ".granter";
-    public static final String timestamp = acm + ".timestamp";
+//    public static final String subject = acm + ".subject";
+//    public static final String entity = acm + ".entity";
+//    public static final String right = acm + ".right";
+//    public static final String granter = acm + ".granter";
+//    public static final String timestamp = acm + ".timestamp";
     //define rights for acm
-    public static final String read_only = "r";
-    public static final String read_write = "w";
-    public static final String write_only = "a";
-    public static final String execute = "e";
+    public static final char read_only = 'r';
+    public static final char read_write = 'w';
+    public static final char write_only = 'a';
+    public static final char execute = 'e';
     //define columns in entityTable
-    public static final String entityID = entityTable + ".entityID";
-    public static final String entityName = entityTable + ".entityName";
-    public static final String subjectOrObject = entityTable + ".subject_or_object";
-    public static final String sensitivity = entityTable + ".sensitivity";
-    public static final String category = entityTable + ".category";
+    public static final String entityID = "entityID";
+    public static final String entityName = "entityName";
+    public static final String subjectOrObject = "subject_or_object";
+    public static final String max_sensitivity = "max_sensitivity";
+    public static final String max_category = "max_category";
+    public static final String curr_sensitivity = "curr_sensitivity";
+    public static final String curr_category = "curr_category";
     //define other constants
-    public static final String subject0 = "subject0";
+//    public static final String subject0 = "subject0";
 
     public LCTBellLaPadula467()
     {
         super();
+
+        String connStr = "jdbc:mysql://localhost:3306";
+        String user = "root";
+        String pwd = "root";
+        this.dbms = "mysql";
+        this.dbName = "LoneClownTheory_blp";
+
+        try
+        {
+            this.con = DriverManager.getConnection(connStr, user, pwd);
+
+            String query = "USE " + dbName;
+            Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            stmt.execute(query);
+            con.setAutoCommit(true);
+        }
+        catch (Exception e)
+        {
+            System.out.println("In LCTBellLaPadula467 Constructor: " + e);
+        }
     }
 
     public LCTBellLaPadula467(Connection connArg, String dbmsArg, String dbNameArg)
@@ -77,32 +99,39 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     public void newSubject(String subjectName, SecurityLevel467 maxLevel)
     {
         Statement stmt = null;
-
         String query = "";
-
         String catStr = this.getCatString(maxLevel);
-        
+
         try
         {
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
             query = "INSERT INTO " + dbName + "." + entityTable
-                    + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`) "
-                    + "VALUES ('" + subjectName + "','1','" + maxLevel.sensitivity.ordinal() + "'," + catStr + ",'" + + maxLevel.sensitivity.ordinal() + "'," + catStr + ")";
+                    + " (`" + entityName + "`,`"
+                    + subjectOrObject + "`,`"
+                    + max_sensitivity + "`,`"
+                    + max_category + "`,`"
+                    + curr_sensitivity + "`,`"
+                    + curr_category + "`) "
+                    + "VALUES ('"
+                    + subjectName
+                    + "','1','"
+                    + maxLevel.sensitivity.ordinal() + "',"
+                    + catStr + ",'"
+                    + +maxLevel.sensitivity.ordinal() + "',"
+                    + catStr + ")";
 
             stmt.executeUpdate(query);
-
-            //System.out.println("OK");
-
+            System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            //System.out.println("NO");
+            System.out.println("NO");
         }
         catch (SQLException e)
         {
-            System.out.println(e);
+            System.out.println("NO");
         }
     }
 
@@ -115,9 +144,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     public void newObject(String objectName, SecurityLevel467 level)
     {
         Statement stmt = null;
-
         String query = "";
-
         String catStr = this.getCatString(level);
 
         try
@@ -125,22 +152,29 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
             query = "INSERT INTO " + dbName + "." + entityTable
-                    + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`) "
-                    + "VALUES ('" + objectName + "','0','0','','" + level.sensitivity.ordinal() + "'," + catStr + ")";
+                    + " (`" + entityName + "`,`"
+                    + subjectOrObject + "`,`"
+                    + max_sensitivity + "`,`"
+                    + max_category + "`,`"
+                    + curr_sensitivity + "`,`"
+                    + curr_category + "`) "
+                    + "VALUES ('"
+                    + objectName
+                    + "','0','0','','"
+                    + level.sensitivity.ordinal() + "',"
+                    + catStr + ")";
 
             stmt.executeUpdate(query);
-
-            //System.out.println("OK");
-
+            System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            //System.out.println("NO");
+            System.out.println("NO");
         }
         catch (SQLException e)
         {
-            System.out.println(e);
+            System.out.println("NO");
         }
     }
 
@@ -155,7 +189,6 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     public String updateSL(String subjectName, SecurityLevel467 level)
     {
         String rtnStr = "NO";
-
         String query = "";
         Statement stmt = null;
 
@@ -163,11 +196,11 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
         if (this.maxDominates(subjectName, "temp"))
         {
-            query = "UPDATE " + entityTable + 
-                    " SET curr_sensitivity = '" + level.sensitivity.ordinal() +
-                    "', curr_category = " + this.getCatString(level) +
-                    " WHERE entityName = '" + subjectName + "';";
-            
+            query = "UPDATE " + entityTable
+                    + " SET " + curr_sensitivity + " = '" + level.sensitivity.ordinal()
+                    + "', " + curr_category + " = " + this.getCatString(level)
+                    + " WHERE " + entityName + " = '" + subjectName + "';";
+
             try
             {
                 stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
@@ -185,7 +218,8 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             rtnStr = "NO";
         }
 
-        query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
+        query = "DELETE FROM " + entityTable
+                + " WHERE " + entityName + "='temp';";
 
         try
         {
@@ -211,7 +245,6 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
     public String classifyOL(String objectName, SecurityLevel467 level)
     {
         String rtnStr = "NO";
-
         String query = "";
         Statement stmt = null;
 
@@ -219,10 +252,10 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
         if (this.dominates("temp", objectName))
         {
-            query = "UPDATE " + entityTable +
-                    " SET curr_sensitivity = '" + level.sensitivity.ordinal() +
-                    "', curr_category = " + this.getCatString(level) +
-                    " WHERE entityName = '" + objectName + "';";
+            query = "UPDATE " + entityTable
+                    + " SET " + curr_sensitivity + " = '" + level.sensitivity.ordinal()
+                    + "', " + curr_category + " = " + this.getCatString(level)
+                    + " WHERE " + entityName + " = '" + objectName + "';";
 
             try
             {
@@ -241,7 +274,8 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             rtnStr = "NO";
         }
 
-        query = "DELETE FROM " + entityTable + " WHERE " + entityName + "='temp';";
+        query = "DELETE FROM " + entityTable
+                + " WHERE " + entityName + "='temp';";
 
         try
         {
@@ -274,10 +308,10 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
         if (this.dominates(subjectName, objectName))
         {
-            query = "UPDATE " + entityTable +
-                    " SET curr_sensitivity = '" + level.sensitivity.ordinal() +
-                    "', curr_category = " + this.getCatString(level) +
-                    " WHERE entityName = '" + objectName + "';";
+            query = "UPDATE " + entityTable
+                    + " SET " + curr_sensitivity + " = '" + level.sensitivity.ordinal()
+                    + "', " + curr_category + " = " + this.getCatString(level)
+                    + " WHERE " + entityName + " = '" + objectName + "';";
 
             try
             {
@@ -316,12 +350,12 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
         switch (action.charAt(0))
         {
-            case 'e':
-            case 'a':
+            case execute:
+            case write_only:
                 simple = true;
                 break;
-            case 'r':
-            case 'w':
+            case read_only:
+            case read_write:
                 simple = this.dominates(subjectName, objectName);
                 break;
             default:
@@ -331,16 +365,16 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
         switch (action.charAt(0))
         {
-            case 'e':
+            case execute:
                 star = true;
                 break;
-            case 'a':
+            case write_only:
                 star = this.dominates(objectName, subjectName);
                 break;
-            case 'r':
+            case read_only:
                 star = this.dominates(subjectName, objectName);
                 break;
-            case 'w':
+            case read_write:
                 star = this.dominates(subjectName, objectName) && this.dominates(objectName, subjectName);
                 break;
             default:
@@ -374,8 +408,8 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                 + "LPAD(BIN(A.curr_category+0),11,'0') as subjcat, "
                 + "LPAD(BIN(B.curr_category+0),11,'0') as objcat, "
                 + "LPAD(BIN(A.curr_category+0 & B.curr_category+0),11,'0') as result "
-                + "FROM loneclowntheory.entityTable AS A, "
-                + "loneclowntheory.entityTable AS B "
+                + "FROM " + entityTable + " AS A, "
+                + entityTable + " AS B "
                 + "HAVING subj='" + subjectName
                 + "' AND obj='" + objectName
                 + "' AND objcat=result AND objLvl<=subjLvl;";
@@ -425,8 +459,8 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                 + "LPAD(BIN(A.max_category+0),11,'0') as subjcat, "
                 + "LPAD(BIN(B.curr_category+0),11,'0') as objcat, "
                 + "LPAD(BIN(A.max_category+0 & B.curr_category+0),11,'0') as result "
-                + "FROM loneclowntheory.entityTable AS A, "
-                + "loneclowntheory.entityTable AS B "
+                + "FROM " + entityTable + " AS A, "
+                + entityTable + " AS B "
                 + "HAVING subj='" + subjectName
                 + "' AND obj='" + objectName
                 + "' AND objcat=result AND objLvl<=subjLvl;";
@@ -495,7 +529,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                     catStr = catStr + "TUS,";
                     break;
                 case ABQ:
-                    catStr = catStr + "NM,ABQ,";
+                    catStr = catStr + "ABQ,";
                     break;
                 case IAH:
                     catStr = catStr + "IAH,";

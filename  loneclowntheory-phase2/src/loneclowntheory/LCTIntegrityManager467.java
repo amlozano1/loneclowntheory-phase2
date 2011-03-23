@@ -7,6 +7,7 @@ package loneclowntheory;
 import java.sql.Connection;
 import java.sql.Statement;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -16,32 +17,59 @@ import java.sql.SQLException;
  */
 public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements IntegrityManager467
 {
-
     private String dbms;
     private String dbName;
     private Connection con;
     //define table names
-    public static final String acm = "acm";
-    public static final String entityTable = "entityTable";
+//    public static final String acm = "acm";
+//    public static final String entityTable = "entityTable";
     ///define columns in acm
-    public static final String subject = acm + ".subject";
-    public static final String entity = acm + ".entity";
-    public static final String right = acm + ".right";
-    public static final String granter = acm + ".granter";
-    public static final String timestamp = acm + ".timestamp";
+//    public static final String subject = acm + ".subject";
+//    public static final String entity = acm + ".entity";
+//    public static final String right = acm + ".right";
+//    public static final String granter = acm + ".granter";
+//    public static final String timestamp = acm + ".timestamp";
     //define rights for acm
-    public static final String read_only = "r";
-    public static final String read_write = "w";
-    public static final String write_only = "a";
-    public static final String execute = "e";
+//    public static final char read_only = 'r';
+//    public static final char read_write = 'w';
+//    public static final char write_only = 'a';
+//    public static final char execute = 'e';
     //define columns in entityTable
-    public static final String entityID = entityTable + ".entityID";
-    public static final String entityName = entityTable + ".entityName";
-    public static final String subjectOrObject = entityTable + ".subject_or_object";
-    public static final String sensitivity = entityTable + ".sensitivity";
-    public static final String category = entityTable + ".category";
+    public static final String entityID = "entityID";
+    public static final String entityName = "entityName";
+    public static final String subjectOrObject = "subject_or_object";
+    public static final String max_sensitivity = "max_sensitivity";
+    public static final String max_category = "max_category";
+    public static final String curr_sensitivity = "curr_sensitivity";
+    public static final String curr_category = "curr_category";
+    public static final String integ = "integrity";
     //define other constants
-    public static final String subject0 = "subject0";
+//    public static final String subject0 = "subject0";
+
+    public LCTIntegrityManager467()
+    {
+        super();
+
+        String connStr = "jdbc:mysql://localhost:3306";
+        String user = "root";
+        String pwd = "root";
+        this.dbms = "mysql";
+        this.dbName = "LoneClownTheory_biba";
+
+        try
+        {
+            this.con = DriverManager.getConnection(connStr, user, pwd);
+
+            String query = "USE " + dbName;
+            Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            stmt.execute(query);
+            con.setAutoCommit(true);
+        }
+        catch (Exception e)
+        {
+            System.out.println("In LCTIntegrityManager467 Constructor: " + e);
+        }
+    }
 
     public LCTIntegrityManager467(Connection connArg, String dbmsArg, String dbNameArg)
     {
@@ -72,9 +100,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
     public void newSubject(String subjectName, SecurityLevel467 maxLevel, IntLevel467 integrity)
     {
         Statement stmt = null;
-
         String query = "";
-
         String catStr = this.getCatString(maxLevel);
 
         try
@@ -82,22 +108,33 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
             query = "INSERT INTO " + dbName + "." + entityTable
-                    + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`, `integrity`) "
-                    + "VALUES ('" + subjectName + "','1','" + maxLevel.sensitivity.ordinal() + "'," + catStr + ",'" + +maxLevel.sensitivity.ordinal() + "'," + catStr + ",'" + integrity.ordinal() + "')";
+                    + " (`" + entityName + "`,`"
+                    + subjectOrObject + "`,`"
+                    + max_sensitivity + "`,`"
+                    + max_category + "`,`"
+                    + curr_sensitivity + "`,`"
+                    + curr_category + "`,`"
+                    + integ + "`) "
+                    + "VALUES ('"
+                    + subjectName
+                    + "','1','"
+                    + maxLevel.sensitivity.ordinal() + "',"
+                    + catStr + ",'"
+                    + +maxLevel.sensitivity.ordinal() + "',"
+                    + catStr + ",'"
+                    + integrity.ordinal() + "')";
 
             stmt.executeUpdate(query);
-
-            //System.out.println("OK");
-
+            System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            //System.out.println("NO");
+            System.out.println("NO");
         }
         catch (SQLException e)
         {
-            System.out.println(e);
+            System.out.println("NO");
         }
     }
 
@@ -111,9 +148,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
     public void newObject(String objectName, SecurityLevel467 level, IntLevel467 integrity)
     {
         Statement stmt = null;
-
         String query = "";
-
         String catStr = this.getCatString(level);
 
         try
@@ -121,22 +156,31 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
             stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
             query = "INSERT INTO " + dbName + "." + entityTable
-                    + " (`entityName`, `subject_or_object`, `max_sensitivity`, `max_category`, `curr_sensitivity`, `curr_category`, `integrity`) "
-                    + "VALUES ('" + objectName + "','0','0','','" + level.sensitivity.ordinal() + "'," + catStr + ",'" + integrity.ordinal() + "')";
+                    + " (`" + entityName + "`,`"
+                    + subjectOrObject + "`,`"
+                    + max_sensitivity + "`,`"
+                    + max_category + "`,`"
+                    + curr_sensitivity + "`,`"
+                    + curr_category + "`,`"
+                    + integ + "`) "
+                    + "VALUES ('"
+                    + objectName
+                    + "','0','0','','"
+                    + level.sensitivity.ordinal() + "',"
+                    + catStr + ",'"
+                    + integrity.ordinal() + "')";
 
             stmt.executeUpdate(query);
-
-            //System.out.println("OK");
-
+            System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            //System.out.println("NO");
+            System.out.println("NO");
         }
         catch (SQLException e)
         {
-            System.out.println(e);
+            System.out.println("NO");
         }
     }
 
@@ -159,13 +203,16 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
 
         switch (action.charAt(0))
         {
-            case 'r':
+            case read_only:
                 result = this.dominates(objectName, subjectName);
                 break;
-            case 'w':
+            case write_only:
                 result = this.dominates(subjectName, objectName);
                 break;
-            case 'e':
+            case read_write:
+                result = this.dominates(subjectName, objectName) && this.dominates(objectName, subjectName);
+                break;
+            case execute:
                 result = this.dominates(subjectName, objectName);
                 break;
             default:
@@ -197,8 +244,8 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
                 + "B.entityName as obj, "
                 + "A.integrity as subjInteg, "
                 + "B.integrity as objInteg "
-                + "FROM loneclowntheory.entityTable AS A, "
-                + "loneclowntheory.entityTable AS B "
+                + "FROM " + entityTable + " AS A, "
+                + entityTable + " AS B "
                 + "HAVING subj='" + subjectName
                 + "' AND obj='" + objectName
                 + "' AND objInteg<=subjInteg;";
@@ -225,9 +272,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         } // Catch any SQLExceptions
         catch (SQLException e)
         {
-            // Debug print
             System.out.println("In checkRights: " + e);
-            // Failure, so return string set to "NO"
             dom = false;
         }
 
