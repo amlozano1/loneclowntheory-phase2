@@ -16,9 +16,10 @@ import java.sql.SQLException;
  */
 public class LCTAuthPolicyManager467 implements AuthPolicyManager467
 {
-    private String dbms;
-    private String dbName;
-    private Connection con;
+
+    protected String dbms;
+    protected String dbName;
+    protected Connection con;
     //define table names
     public static final String acm = "acm";
     public static final String entityTable = "entityTable";
