@@ -12,7 +12,6 @@
  *
  * LCTIntegrityManager467
  */
-
 package loneclowntheory;
 
 // imports
@@ -32,9 +31,10 @@ import java.sql.SQLException;
 public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements IntegrityManager467
 {
     // DB connection information
+
     protected String dbName = "LoneClownTheory_biba";
     public static final String integ = "integrity";
-    
+
     /**
      * Default constructor:
      *
@@ -46,7 +46,7 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         super();
         try
         {
-            this.con = DriverManager.getConnection(connStr, user, pwd);
+            this.con = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "root");
 
             String query = "USE " + dbName;
             Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);

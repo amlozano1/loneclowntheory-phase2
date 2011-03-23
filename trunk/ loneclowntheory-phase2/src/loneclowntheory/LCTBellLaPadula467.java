@@ -31,12 +31,8 @@ import java.sql.SQLException;
 public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellLaPadula467
 {
     // DB connection information
-    protected String dbms = "mysql";
-    protected String connStr = "jdbc:mysql://localhost:3306";
-    protected String user = "root";
-    protected String pwd = "root";
+
     protected String dbName = "LoneClownTheory_blp";
-    protected Connection con;
     // permissions
     public static final char read_only = 'r';
     public static final char read_write = 'w';
@@ -62,7 +58,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         super();
         try
         {
-            this.con = DriverManager.getConnection(connStr, user, pwd);
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "root");
             String query = "USE " + dbName;
             Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             stmt.execute(query);
@@ -775,62 +771,6 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         }
 
         // Return the final return string, either "OK" if at least one right was revoked, otherwise "NO"
-        return rtnStr;
-    }
-
-    /**
-     * Queries the acm table if subject X has right R on entity E_Name.
-     *
-     * @param E_Name  Entity on which subject's rights are being checked
-     * @param X       Subject whose right is being checked
-     * @param R       {"r", "u", "c", "o", "d", "t"}
-     * @return        "OK" on success, "NO" otherwise
-     */
-    @Override
-    public String checkRights(String E_Name, String X, String R)
-    {
-        // Return string initialized to "NO"
-        String rtnStr = "NO";
-
-        // Statement for queries
-        Statement stmt = null;
-
-        // Query string to check if the subject (X) has right (R) on entity (E_Name)
-        String query = "SELECT " + subject + ", " + entity + ", " + right
-                + " FROM " + dbName + "." + acm
-                + " WHERE " + subject + " = '" + X
-                + "' AND " + entity + " = '" + E_Name
-                + "' AND " + right + " = '" + R + "'";
-
-        // try-catch block for SQLExceptions
-        try
-        {
-            // Create the statment object
-            stmt = con.createStatement();
-
-            // Get the result set for the query
-            ResultSet rs = stmt.executeQuery(query);
-
-            // check to see if it has at least one row, indicating that the subject does have the right on the entity
-            if (rs.next())
-            {
-                // If so, the return string is set to "OK"
-                rtnStr = "OK";
-            }
-
-            // Close the result set and statement
-            rs.close();
-            stmt.close();
-        } // Catch any SQLExceptions
-        catch (SQLException e)
-        {
-            // Debug print
-            // System.out.println("In checkRights: " + e);
-            // Failure, so return string set to "NO"
-            rtnStr = "NO";
-        }
-
-        // Return the return string, either "OK" on success or "NO" on failure
         return rtnStr;
     }
 }
