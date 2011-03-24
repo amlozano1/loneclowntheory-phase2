@@ -141,16 +141,18 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             stmt.executeUpdate(query); //execute (insert the row)
 
-            System.out.println("OK");
+            //System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            System.out.println("NO");
+            System.out.println("In newSubject: " + e);
+            //System.out.println("NO");
         }
         catch (SQLException e) // Other sql exceptions
         {
-            System.out.println("NO");
+            System.out.println("In newSubject: " + e);
+            //System.out.println("NO");
         }
     }
 
@@ -201,16 +203,18 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
 
             stmt.executeUpdate(query); //execute (insert the row)
 
-            System.out.println("OK");
+            //System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            System.out.println("NO");
+            System.out.println("In newObject: " + e);
+            //System.out.println("NO");
         }
         catch (SQLException e) // other sql exceptions
         {
-            System.out.println("NO");
+            System.out.println("In newObject: " + e);
+            //System.out.println("NO");
         }
     }
 
@@ -254,7 +258,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             }
             catch (SQLException e) // handle sql exceptions
             {
-                System.out.println(e);
+                System.out.println("In updateSL: " + e);
                 rtnStr = "NO";
             }
         }
@@ -277,7 +281,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         }
         catch (SQLException e) // handle sql exceptions
         {
-            System.out.println(e);
+            System.out.println("In updateSL: " + e);
         }
 
         // return the result
@@ -322,7 +326,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             }
             catch (SQLException e) // handle sql exceptions
             {
-                System.out.println(e);
+                System.out.println("In classifyOL: " + e);
                 rtnStr = "NO";
             }
         }
@@ -345,7 +349,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         }
         catch (SQLException e) // handle sql exceptions
         {
-            System.out.println(e);
+            System.out.println("In classifyOL: " + e);
         }
 
         // reutrn the result
@@ -388,7 +392,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             }
             catch (SQLException e) // handle sql exceptions
             {
-                System.out.println(e);
+                System.out.println("In declassifyOL: " + e);
                 rtnStr = "NO";
             }
         }
@@ -731,7 +735,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                             }
                             else
                             {
-                                // Revoke any 'd', 't', 'r', 'u' from revokee on the given entity
+                                // Revoke any right from revokee on the given entity
                                 do
                                 {
                                     rs.deleteRow();
@@ -758,9 +762,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
                 } // Catch block for SQLExceptions
                 catch (SQLException e)
                 {
-                    // Debug print
-                    // System.out.println("In Revoke: " + e);
-                    // Failure, so return string set to "NO"
+                    System.out.println("In Revoke: " + e);
                     rtnStr = "NO";
                 }
             } // Someone other than an owner of E_Name is trying to revoke, not allowed

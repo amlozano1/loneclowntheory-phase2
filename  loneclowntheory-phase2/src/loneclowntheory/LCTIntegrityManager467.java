@@ -134,16 +134,18 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
 
             stmt.executeUpdate(query); //execute (insert the row)
 
-            System.out.println("OK");
+            //System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            System.out.println("NO");
+            System.out.println(e);
+            //System.out.println("NO");
         }
         catch (SQLException e) // Other sql exceptions
         {
-            System.out.println("NO");
+            System.out.println(e);
+            //System.out.println("NO");
         }
     }
 
