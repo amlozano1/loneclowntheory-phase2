@@ -78,11 +78,28 @@ public class Main
 
         System.out.println("3.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2))); // OK
         System.out.println("3.1 " + lct.access("s1", "o1", "r")); // OK
+        System.out.println("3.2 " + lct.access("s1", "o1", "w")); // OK
+        System.out.println("3.3 " + lct.access("s1", "o1", "a")); // OK
+        System.out.println("3.4 " + lct.access("s1", "o1", "e")); // OK
 
-        System.out.println("4.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.TOP_SECRET, c1))); // NO - trying to set above max level
+        System.out.println("4.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.TOP_SECRET, c2))); // NO - trying to set above max level
+        System.out.println("4.1 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c1))); // NO - trying to set above max level
 
-        System.out.println("5.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2))); // OK
+        System.out.println("5.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c3))); // OK
         System.out.println("5.1 " + lct.access("s1", "o1", "r")); // NO - s1 no longer dominates o1 based on categories
+        System.out.println("5.2 " + lct.access("s1", "o1", "w")); // NO - s1 no longer dominates o1 based on categories
+        System.out.println("5.3 " + lct.access("s1", "o1", "a")); // OK
+        System.out.println("5.4 " + lct.access("s1", "o1", "e")); // OK
+
+        System.out.println("6.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2))); // OK
+
+        System.out.println("7.0 " + lct.classifyOL("o1", new SecurityLevel467(SensitivityLevel467.TOP_SECRET, c2))); // OK
+        System.out.println("7.2 " + lct.classifyOL("o1", new SecurityLevel467(SensitivityLevel467.TOP_SECRET, c1))); // OK
+
+        System.out.println("8.0 " + lct.declassifyOL("s1", "o1", new SecurityLevel467(SensitivityLevel467.SECRET, c2))); // NO - s1 does not dominate o1
+        System.out.println("8.1 " + lct.declassifyOL("subject0", "o1", new SecurityLevel467(SensitivityLevel467.SECRET, c2))); // OK - subject0 dominates o1
+        System.out.println("8.2 " + lct.declassifyOL("s1", "o1", new SecurityLevel467(SensitivityLevel467.CONFIDENTIAL, c2))); // OK - s1 dominates o1
+        System.out.println("8.3 " + lct.declassifyOL("s1", "o1", new SecurityLevel467(SensitivityLevel467.CONFIDENTIAL, c3))); // OK - s1 dominates o1
 
 
 //        // *********************************************************************
