@@ -56,10 +56,10 @@ public class Main
         Category467[] c5 =
         {
         };
-
+        // create new subject and object to test with at same levels to start
         lct.newSubject("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2));
         lct.newObject("o1", new SecurityLevel467(SensitivityLevel467.SECRET, c2));
-
+        // test discretionary rights, grant and revoke
         System.out.println("1.0 " + lct.access("s1", "o1", "r")); // NO - missing discretionary right
         System.out.println("1.1 " + lct.grant("subject0", "s1", "r", "o1")); // OK
         System.out.println("1.2 " + lct.grant("subject0", "s1", "w", "o1")); // OK
@@ -69,30 +69,34 @@ public class Main
         System.out.println("1.6 " + lct.access("s1", "o1", "w")); // OK - has discretionary right and same level
         System.out.println("1.7 " + lct.access("s1", "o1", "a")); // OK - has discretionary right and same level
         System.out.println("1.8 " + lct.access("s1", "o1", "e")); // OK - has discretionary right and same level
-
+        System.out.println("1.9 " + lct.revoke("subject0", "s1", "e", "o1")); // OK
+        System.out.println("1.10 " + lct.access("s1", "o1", "e")); // NO - lost discretionary right
+        System.out.println("1.11 " + lct.grant("subject0", "s1", "e", "o1")); // OK
+        System.out.println("1.12 " + lct.access("s1", "o1", "e")); // OK - has discretionary right and same level
+        // test updateSL and see if change affects access as expected for change in sensitivity
         System.out.println("2.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.CONFIDENTIAL, c2))); // OK
         System.out.println("2.1 " + lct.access("s1", "o1", "r")); // NO - s1 no longer dominates o1 based on sensitivity
         System.out.println("2.2 " + lct.access("s1", "o1", "w")); // NO - o1 dominates s1 based on sensitivity
         System.out.println("2.3 " + lct.access("s1", "o1", "a")); // OK - o1 dominates s1 based on sensitivity
         System.out.println("2.4 " + lct.access("s1", "o1", "e")); // OK - execute so okay
-
+        // restore level and retest access
         System.out.println("3.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2))); // OK
         System.out.println("3.1 " + lct.access("s1", "o1", "r")); // OK
         System.out.println("3.2 " + lct.access("s1", "o1", "w")); // OK
         System.out.println("3.3 " + lct.access("s1", "o1", "a")); // OK
         System.out.println("3.4 " + lct.access("s1", "o1", "e")); // OK
-
+        // try to raise level of subject above max level for both sensitivity and category
         System.out.println("4.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.TOP_SECRET, c2))); // NO - trying to set above max level
         System.out.println("4.1 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c1))); // NO - trying to set above max level
-
+        // test updateSL for change in category
         System.out.println("5.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c3))); // OK
         System.out.println("5.1 " + lct.access("s1", "o1", "r")); // NO - s1 no longer dominates o1 based on categories
         System.out.println("5.2 " + lct.access("s1", "o1", "w")); // NO - s1 no longer dominates o1 based on categories
         System.out.println("5.3 " + lct.access("s1", "o1", "a")); // OK
         System.out.println("5.4 " + lct.access("s1", "o1", "e")); // OK
-
+        // restore subject current level to max level
         System.out.println("6.0 " + lct.updateSL("s1", new SecurityLevel467(SensitivityLevel467.SECRET, c2))); // OK
-
+        //
         System.out.println("7.0 " + lct.classifyOL("o1", new SecurityLevel467(SensitivityLevel467.TOP_SECRET, c2))); // OK
         System.out.println("7.2 " + lct.classifyOL("o1", new SecurityLevel467(SensitivityLevel467.TOP_SECRET, c1))); // OK
 
