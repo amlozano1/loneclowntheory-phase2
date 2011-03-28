@@ -372,9 +372,17 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         String query = ""; // query string
         Statement stmt = null; // sql statement
 
+        // create a temporary object to allow comparison within the DB using
+        // dominates with the new level
+        this.newObject("temp", level);
+
         // check to see if the subject trying to declass the object dominates
-        // the object
-        if (this.dominates(subjectName, objectName))
+        // the object and if the object's level dominates the new level to ensure
+        // that the level is being lowered (the object's data set is being reduced
+        // to a subset of its current data set)
+        // Note: this prevents sanitizing between two non-comparable categories
+        // such as from {PHX} to {ABQ}
+        if (this.dominates(subjectName, objectName) && this.dominates(objectName, "temp"))
         {
             // if so, create a query to update the objects current level to
             // the new level
@@ -400,6 +408,22 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
         else
         {
             rtnStr = "NO";
+        }
+
+        // query to delete temp object
+        query = "DELETE FROM " + entityTable
+                + " WHERE " + entityName + "='temp';";
+
+        try
+        {
+            // execute query to delete temp object
+            stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            stmt.execute(query);
+            stmt.close();
+        }
+        catch (SQLException e) // handle sql exceptions
+        {
+            System.out.println("In classifyOL: " + e);
         }
 
         // return result
@@ -434,7 +458,7 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             case read_only:
             case read_write:
                 // reading occuring so flow of read info must be up
-                simple = this.dominates(subjectName, objectName);
+                simple = this.maxDominates(subjectName, objectName);
                 break;
             default:
                 simple = false;
