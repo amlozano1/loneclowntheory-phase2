@@ -139,12 +139,12 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            System.out.println(e);
+            System.out.println("In newSubject: " + e);
             //System.out.println("NO");
         }
         catch (SQLException e) // Other sql exceptions
         {
-            System.out.println(e);
+            System.out.println("In newSubject: " + e);
             //System.out.println("NO");
         }
     }
@@ -199,16 +199,18 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
 
             stmt.executeUpdate(query); //execute (insert the row)
 
-            System.out.println("OK");
+            //System.out.println("OK");
             stmt.close();
         }
         catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
         {
-            System.out.println("NO");
+            System.out.println("In newObject: " + e);
+            //System.out.println("NO");
         }
         catch (SQLException e) // Other sql exceptions
         {
-            System.out.println("NO");
+            System.out.println("In newObject: " + e);
+            //System.out.println("NO");
         }
     }
 
@@ -216,6 +218,9 @@ public class LCTIntegrityManager467 extends LCTBellLaPadula467 implements Integr
      * Returns "OK" when the subject can perform the action on the object. Behaves as if the subject
      * is actually accessing the object in that it also updates the subject and object's integrity
      * levels based on the action.
+     *
+     * Note: we are implementing strict biba, therefore no changes occur
+     * to integrity levels
      *
      * @param subjectName  The name of the subject.
      * @param objectName   The name of the object.
