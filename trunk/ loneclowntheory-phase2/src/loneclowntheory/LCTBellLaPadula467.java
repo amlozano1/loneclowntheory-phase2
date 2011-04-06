@@ -1,11 +1,11 @@
 /**
  * Lone Clown Theory
- * 
+ *
  * Brandon Andersen
  * Brian Arvidson
  * Anthony Lozano
  * Justin Paglierani
- * 
+ *
  * CSE 467/598
  * Spring 2011
  * Prof. Ahn
@@ -30,7 +30,7 @@ import java.sql.SQLException;
  */
 public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellLaPadula467
 {
-    
+
     // permissions
     public static final char read_only = 'r';
     public static final char read_write = 'w';
