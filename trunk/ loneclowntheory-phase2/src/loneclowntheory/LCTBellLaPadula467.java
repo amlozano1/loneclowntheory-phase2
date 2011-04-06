@@ -17,7 +17,7 @@ package loneclowntheory;
 // imports
 import java.sql.Connection;
 import java.sql.Statement;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+//import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -144,11 +144,11 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             //System.out.println("OK");
             stmt.close();
         }
-        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
-        {
-            System.out.println("In newSubject: " + e);
-            //System.out.println("NO");
-        }
+//        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
+//        {
+//            System.out.println("In newSubject: " + e);
+//            //System.out.println("NO");
+//        }
         catch (SQLException e) // Other sql exceptions
         {
             System.out.println("In newSubject: " + e);
@@ -206,11 +206,11 @@ public class LCTBellLaPadula467 extends LCTAuthPolicyManager467 implements BellL
             //System.out.println("OK");
             stmt.close();
         }
-        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
-        {
-            System.out.println("In newObject: " + e);
-            //System.out.println("NO");
-        }
+//        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
+//        {
+//            System.out.println("In newObject: " + e);
+//            //System.out.println("NO");
+//        }
         catch (SQLException e) // other sql exceptions
         {
             System.out.println("In newObject: " + e);
