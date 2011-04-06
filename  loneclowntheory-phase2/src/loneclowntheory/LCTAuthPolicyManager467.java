@@ -6,7 +6,7 @@ package loneclowntheory;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+//import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -111,11 +111,11 @@ public class LCTAuthPolicyManager467 implements AuthPolicyManager467
             rs.close(); //close the recordset
             stmt.close(); //close the statement
         }
-        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
-        {
-            //System.out.println("newSubject() predoncition failed: " + e.getMessage());
-            System.out.println("NO");
-        }
+//        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
+//        {
+//            //System.out.println("newSubject() predoncition failed: " + e.getMessage());
+//            System.out.println("NO");
+//        }
         catch (SQLException e) //generic SQL error
         {
             System.out.println(e); //spit out SQL error
@@ -169,11 +169,11 @@ public class LCTAuthPolicyManager467 implements AuthPolicyManager467
             rs.close(); //close resultset
             stmt.close(); //close the db conn
         }
-        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
-        {
-            //System.out.println("newObject() predoncition failed: " + e.getMessage());
-            System.out.println("NO");
-        }
+//        catch (MySQLIntegrityConstraintViolationException e) //Predconition fails
+//        {
+//            //System.out.println("newObject() predoncition failed: " + e.getMessage());
+//            System.out.println("NO");
+//        }
         catch (SQLException e)
         {
             System.out.println(e); //spit out sql error
